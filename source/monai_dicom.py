@@ -92,24 +92,32 @@ def train(args):
     #build file lists
     image_label_list = []
     image_file_list = []
-    metadata = args.data_dir+'/meta(1).csv'   
-    
+    metadata = args.data_dir+'/manifest.json'   
     # Load Labels
-    # open csv files
-    annotation=pd.read_csv(metadata)
+    # open json files
+    
+    with open(metadata) as f:
+        manifest = json.load(f)
     
     
+    my_dictionary = {'cap':1, 'normal':0, 'covid':2}
+    class_names = list(my_dictionary.keys())
+    num_class = len(class_names)
     
     # generate file list and label list
     image_file_list=[]
     image_label_list=[]
     #class_names = 'Cardiomegaly'
-    num_class = 3
-    for i, j in zip(annotation.annotation, annotation.files ):
-        print(i,j)
-        filename = args.data_dir+'/'+ j
-        image_file_list.append(filename)
-        image_label_list.extend([[i]])
+    
+    image_label_list=[]
+    image_file_list=[]
+    for file in manifest:
+            name = file['filename']
+            filename = args.data_dir+'/'+name
+            image_file_list.append(filename)
+            label=file['content']['label']
+            label_numeric=my_dictionary[label]
+            image_label_list.extend([[label_numeric]])
     #print('image_label_list ---', image_label_list)
     
     print("Training count =",len(image_file_list))
